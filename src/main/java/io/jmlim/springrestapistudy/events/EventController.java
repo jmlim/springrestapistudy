@@ -16,11 +16,17 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
 public class EventController {
 
+    private final EventRepository eventRepository;
+
+    public EventController(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
+
     @PostMapping
     public ResponseEntity createEvent(@RequestBody Event event) {
+        Event newEvent = this.eventRepository.save(event);
         //HATEOAS가 제공하는 linkTo() 와 methodOn() 사용
-        URI createdUri = linkTo(EventController.class).slash("{id}").toUri();
-        event.setId(10);
+        URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
         return ResponseEntity.created(createdUri).body(event);
     }
 }
