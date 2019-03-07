@@ -74,7 +74,6 @@ public class Event {
 
 
 ```java
-
 @RunWith(SpringRunner.class)
 @WebMvcTest
 public class EventControllerTest {
@@ -124,7 +123,13 @@ public class EventControllerTest {
                 .content(objectMapper.writeValueAsString(event)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("id").exists());
+                .andExpect(jsonPath("id").exists())
+                //.andExpect(header().exists("Location"))
+                //.andExpect(header().string("Content-Type", "application/hal+json;charset=UTF-8"));
+                //type safe 하게 작성하기.
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
     }
+}
 }
 ```
