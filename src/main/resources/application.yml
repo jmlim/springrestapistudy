@@ -11,6 +11,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  ## 스프링부트가 제공하는 프로퍼티즈를 사용한 오브젝트 맵퍼 확장 기능을 사용.
+  ## json 문자열을 오브젝트로 변환하는 과정이 deserialization, 객체를 json으로 변환하는 과정 serialization
+  ## jackson 에서 desrialization할때 모르는 프로퍼티가 있을 경우 실패하도록 옵션주기.
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
 
 logging:
   level:
