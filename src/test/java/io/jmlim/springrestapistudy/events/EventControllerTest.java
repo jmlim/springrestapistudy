@@ -116,4 +116,32 @@ public class EventControllerTest {
                 .andExpect(status().isBadRequest());
 
     }
+
+    @Test
+    public void createEvent_Bad_Request_Empty_Input() throws Exception {
+        // 값들이 비어있어도 아무것도 처리 안했기 때문에(validation 처리) BadRequest 가 나오지 않음.
+        EventDto eventDto = EventDto.builder().build();
+
+        this.mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(eventDto))
+        )
+                .andExpect(status().isBadRequest());
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
