@@ -41,8 +41,6 @@ public class EventControllerTest {
     @Test
     @TestDescription("정상적으로 이벤트를 생성하는 테스트")
     public void createEvent() throws Exception {
-
-
         EventDto eventDto = EventDto.builder()
                 .name("Spring")
                 .description("REST API Development with Spring")
@@ -84,7 +82,11 @@ public class EventControllerTest {
                 .andExpect(jsonPath("id").value(Matchers.not(100)))  //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
                 .andExpect(jsonPath("free").value(false)) //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
                 .andExpect(jsonPath("offline").value(true))
-                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name())); //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name())) //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
+        ;
         /***
          * 잭슨, jsonIgnore 같은걸로 입력제한을 둘 수 있으나 애노테이션이 많아질 수 있으므로 Dto로 따로 분리하는게 낫다.
          * Validation 관련한 애노테이션까지 생기면 헷갈릴 수 있음.

@@ -2,6 +2,7 @@ package io.jmlim.springrestapistudy.events;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -13,7 +14,6 @@ import javax.validation.Valid;
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
@@ -53,8 +53,17 @@ public class EventController {
 
         // event는 모델 매퍼를 통해 새로 만든 객체.
         Event newEvent = eventRepository.save(event);
+
+
+        // 링크를 추가하는 부분
         //HATEOAS가 제공하는 linkTo() 와 methodOn() 사용
-        URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
-        return ResponseEntity.created(createdUri).body(event);
+        ControllerLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
+        URI createdUri = selfLinkBuilder.toUri();
+        EventResource eventResource = new EventResource(event);
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        // 셀프링크는 EventResource 안에 있으므로 주석처리.
+        //eventResource.add(selfLinkBuilder.withSelfRel());
+        eventResource.add(selfLinkBuilder.withRel("update-event"));
+        return ResponseEntity.created(createdUri).body(eventResource);
     }
 }
