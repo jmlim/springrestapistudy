@@ -47,4 +47,21 @@ public class Event {
     private boolean free;
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
+
+    public void update() {
+        // Update free
+        if (this.basePrice == 0 && this.maxPrice == 0) {
+            this.free = true;
+        } else {
+            this.free = false;
+        }
+
+        //update offline
+        //java 11에런 location.isBlank() 면 끝
+        if (this.location == null || this.location.trim().isEmpty()) {
+            this.offline = false;
+        } else {
+            this.offline = true;
+        }
+    }
 }

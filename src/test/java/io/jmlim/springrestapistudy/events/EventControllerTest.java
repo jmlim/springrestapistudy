@@ -82,7 +82,8 @@ public class EventControllerTest {
 
                 // =======위에서 Dto를 통해 입력제한을 두웠으므로 100을 입력했다 하더라도 실제 값은 100이 아님.
                 .andExpect(jsonPath("id").value(Matchers.not(100)))  //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
-                .andExpect(jsonPath("free").value(Matchers.not(true))) //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
+                .andExpect(jsonPath("free").value(false)) //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
+                .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name())); //입력제한 두지 않으면 위에 적용한대로 입력이 되어 테스트 깨딤
         /***
          * 잭슨, jsonIgnore 같은걸로 입력제한을 둘 수 있으나 애노테이션이 많아질 수 있으므로 Dto로 따로 분리하는게 낫다.

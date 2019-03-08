@@ -48,6 +48,9 @@ public class EventController {
         // modelMapper를 사용해서 빌더통해 다 옮기지 않고 한번에 옮긴다.
         Event event = modelMapper.map(eventDto, Event.class);
 
+        //유료인지 무료인지, 온라인인지 오프라인인지 변경.
+        event.update();
+
         // event는 모델 매퍼를 통해 새로 만든 객체.
         Event newEvent = eventRepository.save(event);
         //HATEOAS가 제공하는 linkTo() 와 methodOn() 사용
