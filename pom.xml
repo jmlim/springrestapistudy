@@ -76,6 +76,7 @@
 
     <build>
         <plugins>
+            <!-- rest docs 플러그인 -->
             <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
@@ -97,7 +98,7 @@
                     <dependency>
                         <groupId>org.springframework.restdocs</groupId>
                         <artifactId>spring-restdocs-asciidoctor</artifactId>
-                        <version>${spring-restdocs.version}</version>
+                        <version>2.0.2.RELEASE</version>
                     </dependency>
                 </dependencies>
             </plugin>
