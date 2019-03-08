@@ -155,7 +155,29 @@ public class EventControllerTest {
                 .content(this.objectMapper.writeValueAsString(eventDto))
         )
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$[0].objectName").exists())
+                //.andExpect(jsonPath("$[0].field").exists())
+                .andExpect(jsonPath("$[0].defaultMessage").exists())
+                //.andExpect(jsonPath("$[0].code").exists())
+                .andExpect(jsonPath("$[0].rejectedValue").exists())
+        ;
+        /***
+         * [
+         *     {
+         *         "field": "endEventDateTime",
+         *         "objectName": "eventDto",
+         *         "code": "wrongValue",
+         *         "defaultMessage": "endEventDateTime is wrong",
+         *         "rejectedValue": "2018-11-23T14:21"
+         *     },
+         *     {
+         *         "objectName": "eventDto",
+         *         "code": "wrongPrices",
+         *         "defaultMessage": "values for prices are wrong"
+         *     }
+         * ]
+         */
     }
 }
 
