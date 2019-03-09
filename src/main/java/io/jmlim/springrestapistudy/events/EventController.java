@@ -1,6 +1,7 @@
 package io.jmlim.springrestapistudy.events;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,7 @@ public class EventController {
         // 셀프링크는 EventResource 안에 있으므로 주석처리.
         //eventResource.add(selfLinkBuilder.withSelfRel());
         eventResource.add(selfLinkBuilder.withRel("update-event"));
+        eventResource.add(new Link("/docs/index.html#resources-event-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(eventResource);
     }
 }
