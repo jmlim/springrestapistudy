@@ -19,7 +19,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -92,7 +98,69 @@ public class EventControllerTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
-                .andDo(document("create-event"))
+                .andDo(document("create-event",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("query-events").description("link to query events"),
+                                linkWithRel("update-event").description("link to update an existing event")
+                                //linkWithRel("profile").description("link to profile")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ),
+                        requestFields(
+                                /****
+                                 * {
+                                 *   "name" : "Spring",
+                                 *   "description" : "REST API Development with Spring",
+                                 *   "beginEnrollmentDateTime" : "2018-11-23T14:21:00",
+                                 *   "closeEnrollmentDateTime" : "2018-11-24T14:21:00",
+                                 *   "beginEventDateTime" : "2018-11-25T14:21:00",
+                                 *   "endEventDateTime" : "2018-11-26T14:21:00",
+                                 *   "location" : "강남역 D2 스타트업 팩토리.",
+                                 *   "basePrice" : 100,
+                                 *   "maxPrice" : 200,
+                                 *   "limitOfEnrollment" : 100
+                                 * }
+                                 */
+                                fieldWithPath("name").description("Name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin of new event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close of new event"),
+                                fieldWithPath("beginEventDateTime").description("찹찹"),
+                                fieldWithPath("endEventDateTime").description("이벤트가끝난시간"),
+                                fieldWithPath("location").description("location of new event"),
+                                fieldWithPath("basePrice").description("기본가격"),
+                                fieldWithPath("maxPrice").description("가장 큰 가격"),
+                                fieldWithPath("limitOfEnrollment").description("테스트")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION).description("location header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type")
+                        ),
+                        //relaxedResponseFields(
+                        responseFields(
+                                fieldWithPath("id").description("identifier of new event"),
+                                fieldWithPath("name").description("Name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin of new event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close of new event"),
+                                fieldWithPath("beginEventDateTime").description("찹찹"),
+                                fieldWithPath("endEventDateTime").description("이벤트가끝난시간"),
+                                fieldWithPath("location").description("location of new event"),
+                                fieldWithPath("basePrice").description("기본가격"),
+                                fieldWithPath("maxPrice").description("가장 큰 가격"),
+                                fieldWithPath("limitOfEnrollment").description("테스트"),
+                                fieldWithPath("free").description("프리여부"),
+                                fieldWithPath("offline").description("오프라인여부"),
+                                fieldWithPath("eventStatus").description("이벤트 상태"),
+
+                                fieldWithPath("_links.self.href").description("link to self"),
+                                fieldWithPath("_links.query-events.href").description("link to query event list"),
+                                fieldWithPath("_links.update-event.href").description("link to update existing event")
+                        )
+                ))
         ;
         /***
          * 잭슨, jsonIgnore 같은걸로 입력제한을 둘 수 있으나 애노테이션이 많아질 수 있으므로 Dto로 따로 분리하는게 낫다.
