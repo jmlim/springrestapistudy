@@ -16,6 +16,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.xml.ws.Response;
 import java.net.URI;
 import java.util.Optional;
 
@@ -101,6 +102,39 @@ public class EventController {
         Event event = optionalEvent.get();
         EventResource eventResource = new EventResource(event);
         eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+        return ResponseEntity.ok(eventResource);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id,
+                                      @RequestBody @Valid EventDto eventDto,
+                                      Errors errors) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if (!optionalEvent.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Validation 에러 발생 시 BadRequest 처리.
+        if (errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        // 데이터 검증 테스트
+        eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        Event existingEvent = optionalEvent.get();
+        this.modelMapper.map(eventDto, existingEvent);
+
+        Event savedEvent = this.eventRepository.save(existingEvent);
+        //유료인지 무료인지, 온라인인지 오프라인인지 변경.
+        savedEvent.update();
+
+        EventResource eventResource = new EventResource(savedEvent);
+        eventResource.add(new Link("/docs/index.html#resources-events-update").withRel("profile"));
+
         return ResponseEntity.ok(eventResource);
     }
 }
