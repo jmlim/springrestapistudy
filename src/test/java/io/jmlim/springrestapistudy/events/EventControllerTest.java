@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @Import(RestDocsConfiguration.class)
+@ActiveProfiles("test")
 //@WebMvcTest
 public class EventControllerTest {
 
@@ -235,11 +237,13 @@ public class EventControllerTest {
         )
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].objectName").exists())
+                .andExpect(jsonPath("content[0].objectName").exists())
                 //.andExpect(jsonPath("$[0].field").exists())
-                .andExpect(jsonPath("$[0].defaultMessage").exists())
+                .andExpect(jsonPath("content[0].defaultMessage").exists())
                 //.andExpect(jsonPath("$[0].code").exists())
-                .andExpect(jsonPath("$[0].rejectedValue").exists())
+                .andExpect(jsonPath("content[0].rejectedValue").exists())
+                //입력값이 잘못되었을때 나오는 경로이므로
+                .andExpect(jsonPath("_links.index").exists())
         ;
         /***
          * [
@@ -256,6 +260,31 @@ public class EventControllerTest {
          *         "defaultMessage": "values for prices are wrong"
          *     }
          * ]
+         */
+
+        /** links index 추가 후 jsonArray 가 되었다. 그럴경우 unwrapped 가 되지 않으므로 아래와 같이 리턴됨
+         * 그래서 기존 $[0]을 -> content[0] 으로 변경함
+         * {
+         *     "content": [
+         *         {
+         *             "field": "endEventDateTime",
+         *             "objectName": "eventDto",
+         *             "code": "wrongValue",
+         *             "defaultMessage": "endEventDateTime is wrong",
+         *             "rejectedValue": "2018-11-23T14:21"
+         *         },
+         *         {
+         *             "objectName": "eventDto",
+         *             "code": "wrongPrices",
+         *             "defaultMessage": "values for prices are wrong"
+         *         }
+         *     ],
+         *     "_links": {
+         *         "index": {
+         *             "href": "http://localhost:8080/api"
+         *         }
+         *     }
+         * }
          */
     }
 }

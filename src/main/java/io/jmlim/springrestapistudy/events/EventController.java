@@ -1,5 +1,6 @@
 package io.jmlim.springrestapistudy.events;
 
+import io.jmlim.springrestapistudy.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -33,17 +34,21 @@ public class EventController {
         this.eventValidator = eventValidator;
     }
 
+    private ResponseEntity badRequest(Errors errors){
+        return ResponseEntity.badRequest().body(new ErrorsResource(errors));
+    }
+
     @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
         // Validation 에러 발생 시 BadRequest 처리.
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            return badRequest(errors);
         }
 
         // 데이터 검증 테스트
         eventValidator.validate(eventDto, errors);
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            return badRequest(errors);
         }
 
         // modelMapper를 사용해서 빌더통해 다 옮기지 않고 한번에 옮긴다.
