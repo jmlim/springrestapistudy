@@ -2,12 +2,18 @@ package io.jmlim.springrestapistudy.events;
 
 import io.jmlim.springrestapistudy.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +40,7 @@ public class EventController {
         this.eventValidator = eventValidator;
     }
 
-    private ResponseEntity badRequest(Errors errors){
+    private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
     }
 
@@ -72,5 +78,16 @@ public class EventController {
         eventResource.add(selfLinkBuilder.withRel("update-event"));
         eventResource.add(new Link("/docs/index.html#resources-event-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(eventResource);
+    }
+
+    @GetMapping
+    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
+        Page<Event> page = this.eventRepository.findAll(pageable);
+        //페이지와 관련된 링크 정보들도 같이 넘겨줌 (현재페이지, 이전페이지, 다음페이지, ...)
+        //- Event를 EventResource로 변환해서 받기
+        //    - 각 이벤트 마다 self (  e -> new EventResource(e) )
+        PagedResources<Resource<Event>> pagedResources = assembler.toResource(page, e -> new EventResource(e));
+        pagedResources.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
+        return ResponseEntity.ok(pagedResources);
     }
 }
