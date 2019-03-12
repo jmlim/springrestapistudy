@@ -37,7 +37,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                     .and()
                 .authorizeRequests()
                     .mvcMatchers(HttpMethod.GET, "/api/**")
-                        .anonymous()
+                        // 권한설정 잘못되어있었음..
+                        .permitAll()
                     .anyRequest().authenticated()
                     .and()
                 // 인증이 잘못되었다거나 권한이 없을 때 예외 발생.
