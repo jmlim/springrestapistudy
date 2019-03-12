@@ -4,6 +4,7 @@ import io.jmlim.springrestapistudy.accounts.Account;
 import io.jmlim.springrestapistudy.accounts.AccountRepository;
 import io.jmlim.springrestapistudy.accounts.AccountRole;
 import io.jmlim.springrestapistudy.accounts.AccountService;
+import io.jmlim.springrestapistudy.common.AppProperties;
 import io.jmlim.springrestapistudy.common.BaseControllerTest;
 import io.jmlim.springrestapistudy.common.TestDescription;
 import org.hamcrest.Matchers;
@@ -41,6 +42,9 @@ public class EventControllerTest extends BaseControllerTest {
 
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    AppProperties appProperties;
 
     /**
      * 테스트 디비가 인메모리 디비긴하나.. 테스트간에는 서로 디비를 공유하기 때문에
@@ -186,24 +190,25 @@ public class EventControllerTest extends BaseControllerTest {
 
     public String getAccessToken() throws Exception {
         /* 동일한 계정을 계속 생성하는 문제로 인해 @Before에서 리포지토리 부분 삭제한 부분 있음..*/
-        String username = "hackerljm1@naver.com";
-        String password = "1234";
+        /** 위 이유로 인해 AppConfig의 ApplicationRunner 에서 계정 생성한것이 날아가므로 계정 추가하는 부분 남겨야함. */
+/*        String username = "hackerljm1@naver.com";
+        String password = "1234";*/
         //Given
         Account account = Account.builder()
-                .email(username)
-                .password(password)
+                .email(appProperties.getUserUsername())
+                .password(appProperties.getUserPassword())
                 .roles(Stream.of(AccountRole.ADMIN, AccountRole.USER).collect(Collectors.toSet()))
                 .build();
 
         this.accountService.saveAccount(account);
-
+        /*
         String clientId = "myApp";
-        String clientSecret = "pass";
+        String clientSecret = "pass";*/
 
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret))
-                .param("username", username)
-                .param("password", password)
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+                .param("username", appProperties.getUserUsername())
+                .param("password", appProperties.getUserPassword())
                 .param("grant_type", "password"));
 
         String responseBody = perform.andReturn().getResponse().getContentAsString();

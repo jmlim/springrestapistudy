@@ -1,8 +1,10 @@
 package io.jmlim.springrestapistudy.configs;
 
 import io.jmlim.springrestapistudy.accounts.Account;
+import io.jmlim.springrestapistudy.accounts.AccountRepository;
 import io.jmlim.springrestapistudy.accounts.AccountRole;
 import io.jmlim.springrestapistudy.accounts.AccountService;
+import io.jmlim.springrestapistudy.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -38,14 +40,26 @@ public class AppConfig {
             @Autowired
             AccountService accountService;
 
+            //추가.
+            @Autowired
+            AppProperties appProperties;
+
             @Override
             public void run(ApplicationArguments args) throws Exception {
-                Account account = Account.builder()
-                        .email("jeongmuklim@naver.com")
-                        .password("1234")
+                //application 실행 시 계정 2개 추가.
+                Account admin = Account.builder()
+                        .email(appProperties.getAdminUsername())
+                        .password(appProperties.getAdminPassword())
                         .roles(Stream.of(AccountRole.ADMIN, AccountRole.USER).collect(Collectors.toSet()))
                         .build();
-                accountService.saveAccount(account);
+                accountService.saveAccount(admin);
+
+                Account user = Account.builder()
+                        .email(appProperties.getUserUsername())
+                        .password(appProperties.getUserPassword())
+                        .roles(Stream.of(AccountRole.ADMIN, AccountRole.USER).collect(Collectors.toSet()))
+                        .build();
+                accountService.saveAccount(user);
             }
         };
     }

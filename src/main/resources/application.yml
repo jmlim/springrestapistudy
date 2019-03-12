@@ -30,6 +30,15 @@ logging:
     ## security 로그 보기 위해 설정
     org.springframework.security: debug
 
+## 자동완성 되는 이유 : spring-boot-configuration-processor 의존성 추가로 인함.
+my-app:
+  admin-username: admin@email.com
+  admin-password: 1234admin
+  user-username: user@email.com
+  user-password: 1234user
+  client-id: myApp
+  client-secret: pass
+
 ---
 spring:
   profiles: local
