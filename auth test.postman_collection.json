@@ -1,0 +1,250 @@
+{
+	"id": "d50be873-a75c-b898-e17d-49be3fc02118",
+	"name": "auth test",
+	"description": "",
+	"order": [
+		"5e48a018-2a9e-b49e-aad0-8fad0197e40c",
+		"81d6dc8e-8331-b232-1991-19bec4153b4c",
+		"c4ad03c1-d2f0-a1a3-bc58-0445302e0047",
+		"6a245f87-4375-e34a-cbd1-46f336c8bbb5",
+		"4fc34df0-32d4-52e5-311b-ab74ded1f993"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 1552419788850,
+	"owner": "1712603",
+	"public": false,
+	"requests": [
+		{
+			"id": "4fc34df0-32d4-52e5-311b-ab74ded1f993",
+			"headers": "Authorization: Bearer 6260600b-3961-402e-8200-a3b5b777b004\nContent-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Bearer 6260600b-3961-402e-8200-a3b5b777b004",
+					"description": "",
+					"enabled": true
+				},
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "http://localhost:8080/api/events",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "POST",
+			"collectionId": "d50be873-a75c-b898-e17d-49be3fc02118",
+			"data": [],
+			"dataMode": "raw",
+			"name": "http://localhost:8080/api/events",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1552420428288,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"rawModeData": "{\r\n  \"name\" : \"Spring\",\r\n  \"description\" : \"REST API Development with Spring\",\r\n  \"beginEnrollmentDateTime\" : \"2018-11-23T14:21:00\",\r\n  \"closeEnrollmentDateTime\" : \"2018-11-24T14:21:00\",\r\n  \"beginEventDateTime\" : \"2018-11-25T14:21:00\",\r\n  \"endEventDateTime\" : \"2018-11-26T14:21:00\",\r\n  \"location\" : \"강남역 D2 스타트업 팩토리.\",\r\n  \"basePrice\" : 100,\r\n  \"maxPrice\" : 200,\r\n  \"limitOfEnrollment\" : 100\r\n}"
+		},
+		{
+			"id": "5e48a018-2a9e-b49e-aad0-8fad0197e40c",
+			"headers": "Authorization: Basic bXlBcHA6cGFzcw==\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Basic bXlBcHA6cGFzcw==",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "http://localhost:8080/oauth/token",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "POST",
+			"collectionId": "d50be873-a75c-b898-e17d-49be3fc02118",
+			"data": [
+				{
+					"key": "username",
+					"value": "user@email.com",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "1234user",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "grant_type",
+					"value": "password",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "http://localhost:8080/oauth/token",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1552419791363,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "6a245f87-4375-e34a-cbd1-46f336c8bbb5",
+			"headers": "Authorization: Baarer 48807797-cd6b-4e44-b776-142f1b2ebc61\n",
+			"headerData": [
+				{
+					"key": "Authorization",
+					"value": "Baarer 48807797-cd6b-4e44-b776-142f1b2ebc61",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "http://localhost:8080/api/events",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "d50be873-a75c-b898-e17d-49be3fc02118",
+			"data": [
+				{
+					"key": "username",
+					"value": "user@email.com",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "1234user",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "grant_type",
+					"value": "password",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "http://localhost:8080/api/events",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1552420074185,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "81d6dc8e-8331-b232-1991-19bec4153b4c",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:8080/api/events",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "d50be873-a75c-b898-e17d-49be3fc02118",
+			"data": [
+				{
+					"key": "username",
+					"value": "user@email.com",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "1234user",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "grant_type",
+					"value": "password",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "http://localhost:8080/api/events",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1552419804640,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		},
+		{
+			"id": "c4ad03c1-d2f0-a1a3-bc58-0445302e0047",
+			"headers": "",
+			"headerData": [],
+			"url": "http://localhost:8080/api",
+			"queryParams": [],
+			"pathVariables": {},
+			"pathVariableData": [],
+			"preRequestScript": null,
+			"method": "GET",
+			"collectionId": "d50be873-a75c-b898-e17d-49be3fc02118",
+			"data": [
+				{
+					"key": "username",
+					"value": "user@email.com",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "password",
+					"value": "1234user",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				},
+				{
+					"key": "grant_type",
+					"value": "password",
+					"description": "",
+					"type": "text",
+					"enabled": true
+				}
+			],
+			"dataMode": "urlencoded",
+			"name": "http://localhost:8080/api",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1552419812965,
+			"version": 2,
+			"responses": [],
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {}
+		}
+	]
+}
