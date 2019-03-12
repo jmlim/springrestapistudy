@@ -50,6 +50,7 @@ public class Event {
     private EventStatus eventStatus = EventStatus.DRAFT;
 
     @ManyToOne
+    //@JoinColumn(nullable = false)
     private Account manager;
 
     public void update() {
