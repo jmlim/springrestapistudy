@@ -337,7 +337,7 @@ public class EventControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기.")
+    @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기.(인증정보 없음)")
     public void queryEvents() throws Exception {
         // Given (이벤트 30개 만들어야함.
         /*IntStream.range(0, 30).forEach(i -> {
@@ -358,6 +358,37 @@ public class EventControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("query-events"))
+        //나머지 문서화도 해야하나 강의에선 생략.. (필드, 헤더, 링크스에 대한 설명 등)
+        ;
+    }
+
+    @Test
+    @TestDescription("30개의 이벤트를 10개씩 두번째 페이지 조회하기.(인증정보 있음)")
+    public void queryEventsWithAuthentication() throws Exception {
+        // Given (이벤트 30개 만들어야함.
+        /*IntStream.range(0, 30).forEach(i -> {
+            this.generateEvent(i);
+        });*/
+        IntStream.range(0, 30).forEach(this::generateEvent);
+
+
+        //When
+        this.mockMvc.perform(get("/api/events")
+                //인증정보 추가.
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "name,DESC")
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                // 인증정보가 있을 시 create-event 링크 나오도록
+                .andExpect(jsonPath("_links.create-event").exists())
                 .andDo(document("query-events"))
         //나머지 문서화도 해야하나 강의에선 생략.. (필드, 헤더, 링크스에 대한 설명 등)
         ;
