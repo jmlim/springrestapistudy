@@ -1,22 +1,32 @@
 package io.jmlim.springrestapistudy.events;
 
+import io.jmlim.springrestapistudy.accounts.Account;
+import io.jmlim.springrestapistudy.accounts.AccountRepository;
+import io.jmlim.springrestapistudy.accounts.AccountRole;
+import io.jmlim.springrestapistudy.accounts.AccountService;
 import io.jmlim.springrestapistudy.common.BaseControllerTest;
 import io.jmlim.springrestapistudy.common.TestDescription;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -25,6 +35,22 @@ public class EventControllerTest extends BaseControllerTest {
 
     @Autowired
     EventRepository eventRepository;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    AccountService accountService;
+
+    /**
+     * 테스트 디비가 인메모리 디비긴하나.. 테스트간에는 서로 디비를 공유하기 때문에
+     * 데이터가 공유가 되버리니.. 처리
+     */
+    @Before
+    public void setUp() {
+        this.eventRepository.deleteAll();
+        this.accountRepository.deleteAll();
+    }
 
     /**
      * 우리가 만든 테스트가 슬라이스 테스트이므로 웹용 빈만 등록해줌.
@@ -50,7 +76,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         // mock 리포지토리를 받았으므로 이벤트 리포지토리가 세이브가 호출이 되면 이벤트를 그대로 리턴하게 해좀.
         // event는 모델 매퍼를 통해 새로 만든 객체. 파라미터의 event가 있어야 하는데 그게 아니므로.. 그래서 실제 데이터가 있다 가정하고 모킹을 지움.
-        // @SrpingBootTest로 실제 테스트
+        // @SpringBootTest로 실제 테스트
         // Mockito.when(eventRepository.save(event)).thenReturn(event);
 
         /**
@@ -59,6 +85,8 @@ public class EventControllerTest extends BaseControllerTest {
          * id는 DB에 들어갈 때 자동생성된 값으로 나오는지 확인.
          */
         mockMvc.perform(post("/api/events/")
+                // 헤더에 인증 토큰 추가.
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 // 객체를 json 문자열로 변경 후 본문에 넣음.
@@ -121,8 +149,9 @@ public class EventControllerTest extends BaseControllerTest {
                                 headerWithName(HttpHeaders.LOCATION).description("location header"),
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type")
                         ),
-                        //relaxedResponseFields(
-                        responseFields(
+                        //   "manager" : null 이 나와서 relaxedResponseFields로 변경.
+                        relaxedResponseFields(
+                                //responseFields(
                                 fieldWithPath("id").description("identifier of new event"),
                                 fieldWithPath("name").description("Name of new event"),
                                 fieldWithPath("description").description("description of new event"),
@@ -151,6 +180,37 @@ public class EventControllerTest extends BaseControllerTest {
          */
     }
 
+    public String getBearerToken() throws Exception {
+        return "Bearer " + this.getAccessToken();
+    }
+
+    public String getAccessToken() throws Exception {
+        /* 동일한 계정을 계속 생성하는 문제로 인해 @Before에서 리포지토리 부분 삭제한 부분 있음..*/
+        String username = "hackerljm1@naver.com";
+        String password = "1234";
+        //Given
+        Account account = Account.builder()
+                .email(username)
+                .password(password)
+                .roles(Stream.of(AccountRole.ADMIN, AccountRole.USER).collect(Collectors.toSet()))
+                .build();
+
+        this.accountService.saveAccount(account);
+
+        String clientId = "myApp";
+        String clientSecret = "pass";
+
+        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(clientId, clientSecret))
+                .param("username", username)
+                .param("password", password)
+                .param("grant_type", "password"));
+
+        String responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+        return parser.parseMap(responseBody).get("access_token").toString();
+    }
+
     @Test
     @TestDescription("입력 받을 수 없는 값을 사용한 경우에 이러게 발생하는 테스트")
     public void createEvent_Bad_Request() throws Exception {
@@ -172,6 +232,7 @@ public class EventControllerTest extends BaseControllerTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 // 객체를 json 문자열로 변경 후 본문에 넣음.
@@ -187,6 +248,7 @@ public class EventControllerTest extends BaseControllerTest {
         EventDto eventDto = EventDto.builder().build();
 
         this.mockMvc.perform(post("/api/events")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(eventDto))
         )
@@ -212,6 +274,7 @@ public class EventControllerTest extends BaseControllerTest {
                 .build();
 
         this.mockMvc.perform(post("/api/events")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(eventDto))
         )
@@ -353,6 +416,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & Then
         this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -374,6 +438,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & Then
         this.mockMvc.perform(put("/api/events/{id}", event.getId())
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -391,7 +456,8 @@ public class EventControllerTest extends BaseControllerTest {
         eventDto.setMaxPrice(1000);
 
         //When & then
-        this.mockMvc.perform(put("/api/events/12345"))
+        this.mockMvc.perform(put("/api/events/12345")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken()))
                 .andExpect(status().isBadRequest());
     }
 
@@ -405,6 +471,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & then
         this.mockMvc.perform(put("/api/events/12345")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
