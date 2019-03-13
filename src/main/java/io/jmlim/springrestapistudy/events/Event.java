@@ -1,6 +1,8 @@
 package io.jmlim.springrestapistudy.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.jmlim.springrestapistudy.accounts.Account;
+import io.jmlim.springrestapistudy.accounts.AccountSerializer;
 import lombok.*;
 
 import javax.persistence.*;
@@ -51,6 +53,7 @@ public class Event {
 
     @ManyToOne
     //@JoinColumn(nullable = false)
+    @JsonSerialize(using = AccountSerializer.class)    // Account 의 구체적인 알필요가 없음.
     private Account manager;
 
     public void update() {
