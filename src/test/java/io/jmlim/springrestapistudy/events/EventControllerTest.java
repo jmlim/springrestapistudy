@@ -90,7 +90,7 @@ public class EventControllerTest extends BaseControllerTest {
          */
         mockMvc.perform(post("/api/events/")
                 // 헤더에 인증 토큰 추가.
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 // 객체를 json 문자열로 변경 후 본문에 넣음.
@@ -184,23 +184,19 @@ public class EventControllerTest extends BaseControllerTest {
          */
     }
 
-    public String getBearerToken() throws Exception {
-        return "Bearer " + this.getAccessToken();
+    public String getBearerToken(boolean needToCreateAccount) throws Exception {
+        return "Bearer " + this.getAccessToken(needToCreateAccount);
     }
 
-    public String getAccessToken() throws Exception {
+    public String getAccessToken(boolean needToCreateAccount) throws Exception {
         /* 동일한 계정을 계속 생성하는 문제로 인해 @Before에서 리포지토리 부분 삭제한 부분 있음..*/
         /** 위 이유로 인해 AppConfig의 ApplicationRunner 에서 계정 생성한것이 날아가므로 계정 추가하는 부분 남겨야함. */
 /*        String username = "hackerljm1@naver.com";
         String password = "1234";*/
         //Given
-        Account account = Account.builder()
-                .email(appProperties.getUserUsername())
-                .password(appProperties.getUserPassword())
-                .roles(Stream.of(AccountRole.ADMIN, AccountRole.USER).collect(Collectors.toSet()))
-                .build();
-
-        this.accountService.saveAccount(account);
+        if (needToCreateAccount) {
+            createAccount();
+        }
         /*
         String clientId = "myApp";
         String clientSecret = "pass";*/
@@ -214,6 +210,16 @@ public class EventControllerTest extends BaseControllerTest {
         String responseBody = perform.andReturn().getResponse().getContentAsString();
         Jackson2JsonParser parser = new Jackson2JsonParser();
         return parser.parseMap(responseBody).get("access_token").toString();
+    }
+
+    private Account createAccount() {
+        Account account = Account.builder()
+                .email(appProperties.getUserUsername())
+                .password(appProperties.getUserPassword())
+                .roles(Stream.of(AccountRole.ADMIN, AccountRole.USER).collect(Collectors.toSet()))
+                .build();
+
+        return this.accountService.saveAccount(account);
     }
 
     @Test
@@ -237,7 +243,7 @@ public class EventControllerTest extends BaseControllerTest {
                 .build();
 
         mockMvc.perform(post("/api/events/")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 // 객체를 json 문자열로 변경 후 본문에 넣음.
@@ -253,7 +259,7 @@ public class EventControllerTest extends BaseControllerTest {
         EventDto eventDto = EventDto.builder().build();
 
         this.mockMvc.perform(post("/api/events")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(eventDto))
         )
@@ -279,7 +285,7 @@ public class EventControllerTest extends BaseControllerTest {
                 .build();
 
         this.mockMvc.perform(post("/api/events")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(this.objectMapper.writeValueAsString(eventDto))
         )
@@ -376,7 +382,7 @@ public class EventControllerTest extends BaseControllerTest {
         //When
         this.mockMvc.perform(get("/api/events")
                 //인증정보 추가.
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .param("page", "1")
                 .param("size", "10")
                 .param("sort", "name,DESC")
@@ -398,7 +404,8 @@ public class EventControllerTest extends BaseControllerTest {
     @TestDescription("기존의 이벤트를 하나 조회하기")
     public void getEvent() throws Exception {
         //Given
-        Event event = this.generateEvent(100);
+        Account account = this.createAccount();
+        Event event = this.generateEvent(100, account);
 
         //When & then
         this.mockMvc.perform(get("/api/events/{id}", event.getId()))
@@ -420,8 +427,19 @@ public class EventControllerTest extends BaseControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    private Event generateEvent(int index, Account account) {
+        Event event = buildEvent(index);
+        event.setManager(account);
+        return this.eventRepository.save(event);
+    }
+
     private Event generateEvent(int index) {
-        Event event = Event.builder()
+        Event event = buildEvent(index);
+        return this.eventRepository.save(event);
+    }
+
+    private Event buildEvent(int index) {
+        return Event.builder()
                 .name("event " + index)
                 .description("test event")
                 .beginEnrollmentDateTime(LocalDateTime.of(2018, 11, 23, 14, 21))
@@ -436,15 +454,14 @@ public class EventControllerTest extends BaseControllerTest {
                 .offline(true)
                 .eventStatus(EventStatus.DRAFT)
                 .build();
-
-        return this.eventRepository.save(event);
     }
 
     @Test
     @TestDescription("정상적으로 이벤트 수정")
     public void updateEvent() throws Exception {
         //Given
-        Event event = this.generateEvent(100);
+        Account account = this.createAccount();
+        Event event = this.generateEvent(100, account);
 
         EventDto eventDto = this.modelMapper.map(event, EventDto.class);
         String eventName = "수정한 이벤트";
@@ -452,7 +469,8 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & Then
         this.mockMvc.perform(put("/api/events/{id}", event.getId())
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                // 얘는 계정을 새로 만들필요가 없으므로..
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(false))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -474,7 +492,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & Then
         this.mockMvc.perform(put("/api/events/{id}", event.getId())
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -493,7 +511,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & then
         this.mockMvc.perform(put("/api/events/12345")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken()))
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -507,7 +525,7 @@ public class EventControllerTest extends BaseControllerTest {
 
         //When & then
         this.mockMvc.perform(put("/api/events/12345")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken(true))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
